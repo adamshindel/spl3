@@ -1,6 +1,7 @@
 package bgu.spl181.net.api.bidi;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 import bgu.spl181.net.srv.Movie_Rental_Service_Users;
 import bgu.spl181.net.srv.User;
@@ -39,7 +40,7 @@ public class User_service_text_protocol implements BidiMessagingProtocol<String>
 			}
 			String country = parts[3].substring(parts[3].indexOf("=\"") + 1);// (\") allows to insert quote inside a string
 			country = country.substring(0, country.length() -2); // cutting last quote
-			users.addUser(new User(parts[1], "normal", parts[2], country, new ArrayList<>(), 0));
+			users.addUser(new User(parts[1], "normal", parts[2], country, new ConcurrentHashMap<String,String>(), 0));
 			connections.send(connectionId, "ACK registration succeeded");
 			break;
 		

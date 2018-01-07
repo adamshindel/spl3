@@ -40,26 +40,26 @@ public class Movies {
 			
 		}
 	}
-		public Movie getMovieByName(String name) {
-			for(Movie m : movies) {
-				if(m.name == name)
-					return m;
-			}
-			return null;
+
+	public Movie getMovieByName(String name) {
+		for (Movie m : movies) {
+			if (m.name == name)
+				return m;
 		}
-		public static void addMovie(Movie toAdd) {
-			try
-	        {
-	            Gson gson = new Gson();
-	            String jsonString = gson.toJson(toAdd);       
-	            FileWriter fileWriter = new FileWriter(location, true);
-	            fileWriter.write(jsonString);
-	            fileWriter.close();
-	            
-	        } catch (Exception e)
-	        {
-	            e.printStackTrace();
-	        }
-		}
-		
+		return null;
 	}
+
+	public static void addMovie(Movie toAdd) {
+		try {
+			Gson gson = new Gson();
+			String jsonString = gson.toJson(toAdd);
+			FileWriter fileWriter = new FileWriter(location, true);
+			fileWriter.write(jsonString);
+			fileWriter.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}

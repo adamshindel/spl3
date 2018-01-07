@@ -1,6 +1,6 @@
 package bgu.spl181.net;
 
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 import bgu.spl181.net.srv.Movie_Rental_Service_Users;
 import bgu.spl181.net.srv.User;
@@ -17,8 +17,9 @@ public class BidiServer {
 		}
 		System.out.println("   length is " + a.length);
 		
-		User adam = new User("AdamShindel2", "some type","Cola", "Israel",new ArrayList<>(),5);
+		User adam = new User("AdamShindel2", "some type","Cola", "Israel",new ConcurrentHashMap<String,String>(),5);
 		service.addUser(adam);
+		service.changeBalanceUser("AdamShindel2", 6000);
 		//service.changeBalanceUser(adam.userName, 1111);
 	}
 }

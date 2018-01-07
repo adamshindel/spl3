@@ -5,6 +5,8 @@
 * This code assumes that the server replies the exact text the client sent it (as opposed to the practical session example)
 */
 int main (int argc, char *argv[]) {
+    boost::tread_group tgroup;
+
     if (argc < 3) {
         std::cerr << "Usage: " << argv[0] << " host port" << std::endl << std::endl;
         return -1;
@@ -19,6 +21,7 @@ int main (int argc, char *argv[]) {
     }
     
     //From here we will see the rest of the ehco client implementation:
+    tgroup
     while (1) {
         const short bufsize = 1024;
         char buf[bufsize];
