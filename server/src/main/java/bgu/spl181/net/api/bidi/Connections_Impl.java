@@ -15,15 +15,12 @@ public class Connections_Impl<T> implements Connections<T> {
 	private Map<Integer, ConnectionHandler<T>> activeUsers;
 	// will hold all connected users
 
-	private Map<Integer, ConnectionHandler<T>> registeredUsers;
-	// will hold all connected users
-
 	@Override
 	/**
 	 * send's Confirmation message??
 	 */
 	public boolean send(int connectionId, Object msg) {
-		if(registeredUsers.containsKey(connectionId)) {
+		if(activeUsers.containsKey(connectionId)) {
 		activeUsers.get(connectionId).send((T) msg);
 		return true;
 		}

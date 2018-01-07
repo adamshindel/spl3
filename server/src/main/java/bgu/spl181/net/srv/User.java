@@ -12,9 +12,9 @@ public class User {
 	public String password;
 	public String country;
 	public ArrayList<Movie> movie;
-	public String balance;
+	public int balance;
 	
-	public User(String userName, String type, String password, String country, ArrayList<Movie> movie, String balance) {
+	public User(String userName, String type, String password, String country, ArrayList<Movie> movie, int balance) {
 		this.userName = userName;
 		this.type = type;
 		this.password = password;
