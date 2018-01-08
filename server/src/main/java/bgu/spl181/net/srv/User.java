@@ -22,5 +22,8 @@ public class User {
 		this.movie = movie;
 		this.balance = balance;
 	}
+	public void setBalance(int other){
+		this.balance=other;
+	}
 	
 }

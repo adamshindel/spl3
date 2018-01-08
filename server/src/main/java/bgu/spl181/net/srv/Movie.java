@@ -12,10 +12,10 @@ public class Movie {
 	public String id;
 	public String name;
 	public int price;
-	public String availableAmount;
-	public String totalAmount;
+	public int availableAmount;
+	public int totalAmount;
 	public ArrayList <String> bannedCountries;
-	public Movie (String id,String name,int price, String availableAmount,String totalAmount,ArrayList<String>bannedCountries){
+	public Movie (String id,String name,int price, int availableAmount,int totalAmount,ArrayList<String>bannedCountries){
 		this.id=id;
 		this.name=name;
 		this.availableAmount=availableAmount;
@@ -23,6 +23,13 @@ public class Movie {
 		this.totalAmount=totalAmount;
 		this.bannedCountries=bannedCountries;
 	}
+	 public void setAvailableAmount(int other){
+		 this.availableAmount=other;
+	 }
+	 public void setPrice(int other){
+		 this.price=other;
+	 }
+	
 
 }
 

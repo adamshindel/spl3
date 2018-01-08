@@ -18,6 +18,7 @@ public class Movie_Rental_Service_Users {
 	private static final String location = "C:\\projects\\spl\\assignment 3\\project\\server\\Database\\Users.json";
 	private ArrayList<User> users;
 	private ArrayList<User> loggedUsers;
+	
 
 	public Movie_Rental_Service_Users() {
 
@@ -40,13 +41,15 @@ public class Movie_Rental_Service_Users {
 					String name = jmovie.getAsJsonObject().get("name").getAsString();
 					int price = jmovie.getAsJsonObject().get("price").getAsInt();
 					String availableAmount = jmovie.getAsJsonObject().get("availableAmount").getAsString();
+					int availableAmountInt=Integer.parseInt(availableAmount);
 					String totalAmount = jmovie.getAsJsonObject().get("totalAmount").getAsString();
+					int totalAmountInt=Integer.parseInt(totalAmount);
 					JsonArray jbannedCountries = jmovie.getAsJsonObject().get("bannedCountries").getAsJsonArray();
 					ArrayList<String> bannedCountries = new ArrayList<String>();
 					for (JsonElement element2 : jbannedCountries) {
 						bannedCountries.add(element2.getAsString());
 					}
-					movies.add(new Movie(id, name, price, availableAmount, totalAmount, bannedCountries));
+					movies.add(new Movie(id, name, price, availableAmountInt, totalAmountInt, bannedCountries));
 				}
 				int balance = element.getAsJsonObject().get("balance").getAsInt();
 				this.users.add(new User(userName, type, password, country, movies, balance));

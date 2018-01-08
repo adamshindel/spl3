@@ -14,6 +14,7 @@ public class Movies {
 	
 	private static final String location = "C:\\projects\\spl\\assignment 3\\project\\server\\Database\\Movies.json";
 	private ArrayList <Movie> movies=new ArrayList <Movie>() ;
+	private String highyestId = "0";
 	
 	public Movies(){
 		JsonParser parser=new JsonParser();
@@ -27,12 +28,17 @@ public class Movies {
 				int price =element.getAsJsonObject().get("price").getAsInt();
 				String availableAmount =element.getAsJsonObject().get("availableAmount").getAsString();
 				String totalAmount =element.getAsJsonObject().get("totalAmount").getAsString();
+				int totalAmountInt=Integer.parseInt(totalAmount);
+				int availableAmountInt=Integer.parseInt(availableAmount);
 				JsonArray jbannedCountries=element.getAsJsonObject().get("bannedCountries").getAsJsonArray();
 				ArrayList <String> bannedCountries=new ArrayList<String>();
 				for(JsonElement element2 : jbannedCountries){
 					bannedCountries.add(element2.getAsString());
 				}
-				movies.add(new Movie(id,name,price,availableAmount,totalAmount,bannedCountries));  
+				movies.add(new Movie(id,name,price,availableAmountInt,totalAmountInt,bannedCountries));  
+				if(Integer.parseInt(id) > Integer.parseInt(highyestId)){
+					highyestId = id;
+				}
 			}
 			
 		}
@@ -47,7 +53,12 @@ public class Movies {
 			}
 			return null;
 		}
-		public static void addMovie(Movie toAdd) {
+		public void addMovie(Movie toAdd) {
+			movies.add(toAdd);
+			if(Integer.parseInt(toAdd.id) > Integer.parseInt(highyestId)){
+				highyestId = toAdd.id;
+			}
+
 			try
 	        {
 	            Gson gson = new Gson();
@@ -60,6 +71,25 @@ public class Movies {
 	        {
 	            e.printStackTrace();
 	        }
+		}
+		public void removeMovie(Movie toRemove){
+			movies.remove(toRemove);
+			if(toRemove.id==highyestId){
+				highyestId=(Integer.parseInt(highyestId)+1)+"";
+			}
+			//removie from json
+			
+			
+		}
+		
+		public ArrayList <Movie> getMovies(){
+			return movies;
+		}
+		public void setHighestId(String other){
+			 this.highyestId=other;
+		}
+		public String getHighestId(){
+			 return highyestId;
 		}
 		
 	}
