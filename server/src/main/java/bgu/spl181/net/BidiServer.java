@@ -1,5 +1,6 @@
 package bgu.spl181.net;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import bgu.spl181.net.srv.Movie_Rental_Service_Users;
@@ -17,9 +18,13 @@ public class BidiServer {
 		}
 		System.out.println("   length is " + a.length);
 		
-		User adam = new User("AdamShindel2", "some type","Cola", "Israel",new ConcurrentHashMap<String,String>(),5);
-		service.addUser(adam);
-		service.changeBalanceUser("AdamShindel2", 6000);
-		//service.changeBalanceUser(adam.userName, 1111);
+		User john = new User("john","admin","potato","united states",new ConcurrentHashMap<>(),"0");
+		//service.addUser(adam);
+		Map<String,String> moviesToAdd = new ConcurrentHashMap<>();
+		moviesToAdd.put("0", "movie1");
+		moviesToAdd.put("1", "movie2");
+		moviesToAdd.put("2", "movie3");
+		john.movies = moviesToAdd;
+		service.changeMoviesUser(john, moviesToAdd);
 	}
 }

@@ -13,9 +13,9 @@ public class User {
 	public String password;
 	public String country;
 	public Map<String, String> movies;
-	public int balance;
+	public String balance;
 	
-	public User(String userName, String type, String password, String country, Map<String, String> movies, int balance) {
+	public User(String userName, String type, String password, String country, Map<String, String> movies, String balance) {
 		this.userName = userName;
 		this.type = type;
 		this.password = password;

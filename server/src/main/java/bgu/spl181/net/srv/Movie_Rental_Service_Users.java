@@ -55,7 +55,7 @@ public class Movie_Rental_Service_Users {
 					 * bannedCountries));
 					 */
 				}
-				int balance = element.getAsJsonObject().get("balance").getAsInt();
+				String balance = element.getAsJsonObject().get("balance").getAsString();
 				this.users.add(new User(userName, type, password, country, movies, balance));
 			}
 			fileReader.close();
@@ -87,7 +87,6 @@ public class Movie_Rental_Service_Users {
 	public void addUser(User toAdd) {
 		try {
 
-			String location2 = "C:\\projects\\spl\\assignment 3\\project\\server\\Database\\Users2.json";
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
 			FileReader fileReader = new FileReader(location);
@@ -110,8 +109,9 @@ public class Movie_Rental_Service_Users {
 			newE.getAsJsonObject().add("movies", j);
 			newE.getAsJsonObject().addProperty("balance", toAdd.balance);
 			jusers.add(newE);
-			FileWriter fileWriter = new FileWriter(location2, false);
+			FileWriter fileWriter = new FileWriter(location, false);
 			fileWriter.write(gson.toJson(obj));
+			fileWriter.flush();
 			fileWriter.close();
 			users.add(toAdd);
 		} catch (Exception e) {
@@ -123,13 +123,10 @@ public class Movie_Rental_Service_Users {
 		loggedUsers.remove(u);
 	}
 
-	public void changeBalanceUser(String userName, int balance) {
-		User toChange = this.getUserByName(userName);
-		toChange.balance = balance;
+	public void changeUser(User changedUser, String property, String value) {
 
 		try {
 
-			String location2 = "C:\\projects\\spl\\assignment 3\\project\\server\\Database\\Users2.json";
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
 			FileReader fileReader = new FileReader(location);
@@ -137,22 +134,19 @@ public class Movie_Rental_Service_Users {
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray jusers = jsonObj.get("users").getAsJsonArray();
 			for (JsonElement element : jusers) {
-				if(element.getAsJsonObject().get("username").getAsString().equals(userName)) {
-					//element.getAsJsonObject().remove("balance");
-					//element.getAsJsonObject().addProperty("balance", balance);
-					jusers.remove(element);
+				if(element.getAsJsonObject().get("username").getAsString().equals(changedUser.userName)) {
+					element.getAsJsonObject().addProperty(property, value);
 					break;
 				}
 			}
-			FileWriter fileWriter = new FileWriter(location2, false);
+			FileWriter fileWriter = new FileWriter(location, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.close();
 			
-			addUser(toChange);
-			
 			for(User u : users) {
-				if(u.userName == userName) {
-					u.balance = balance;
+				if(u.userName == changedUser.userName) {
+					users.remove(u);
+					users.add(changedUser);
 					break;
 				}
 			}
@@ -160,6 +154,47 @@ public class Movie_Rental_Service_Users {
 			e.printStackTrace();
 		}
 	}
+	
+	public void changeMoviesUser(User changedUser, Map<String,String> movies) {
+
+		try {
+
+			Gson gson = new Gson();
+			JsonParser parser = new JsonParser();
+			FileReader fileReader = new FileReader(location);
+			Object obj = parser.parse(fileReader);
+			JsonObject jsonObj = (JsonObject) obj;
+			JsonArray j = new JsonArray();
+			for (Map.Entry<String, String> entry : movies.entrySet()) {
+				JsonObject tmp = new JsonObject();
+				tmp.addProperty("id", entry.getKey());
+				tmp.addProperty("name", entry.getValue());
+				j.add(tmp);
+			}
+			JsonArray jusers = jsonObj.get("users").getAsJsonArray();
+			
+			for (JsonElement element : jusers) {
+				if(element.getAsJsonObject().get("username").getAsString().equals(changedUser.userName)) {
+					element.getAsJsonObject().add("movies", j);
+					break;
+				}
+			}
+			FileWriter fileWriter = new FileWriter(location, false);
+			fileWriter.write(gson.toJson(obj));
+			fileWriter.close();
+			
+			for(User u : users) {
+				if(u.userName == changedUser.userName) {
+					users.remove(u);
+					users.add(changedUser);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	public ArrayList<User> getUsers() {
 		return users;
