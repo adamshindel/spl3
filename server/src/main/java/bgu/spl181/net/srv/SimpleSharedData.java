@@ -16,12 +16,12 @@ public class SimpleSharedData {
 		
 	}
 
-	public static SimpleSharedData getData() {
-		synchronized (instance) {
+	public static synchronized SimpleSharedData getData() {
+		//synchronized (instance) {
 			if (instance == null) {
 				instance = new SimpleSharedData();
 			}
-		}
+		//}
 		return instance;
 	}
 	

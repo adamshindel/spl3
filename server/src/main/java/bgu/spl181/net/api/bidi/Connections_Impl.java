@@ -1,6 +1,8 @@
 package bgu.spl181.net.api.bidi;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -12,7 +14,8 @@ import java.util.Map;
  */
 public class Connections_Impl<T> implements Connections<T> {
 
-	private Map<Integer, ConnectionHandler<T>> activeUsers;
+	private AtomicInteger idCounter = new AtomicInteger(0);
+	private Map<Integer, ConnectionHandler<T>> activeUsers = new ConcurrentHashMap<>();
 	// will hold all connected users
 
 	@Override
@@ -45,6 +48,12 @@ public class Connections_Impl<T> implements Connections<T> {
 	public void disconnect(int connectionId) {
 		// TODO Auto-generated method stub
 		activeUsers.remove(connectionId);
+	}
+	
+	public synchronized Integer connect(ConnectionHandler<T> toAdd) {
+		this.activeUsers.put(idCounter.get(), toAdd);
+		idCounter.incrementAndGet();
+		return idCounter.get();
 	}
 
 }

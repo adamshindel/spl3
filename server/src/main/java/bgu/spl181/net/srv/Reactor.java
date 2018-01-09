@@ -3,6 +3,8 @@ package bgu.spl181.net.srv;
 import bgu.spl181.net.api.MessageEncoderDecoder;
 import bgu.spl181.net.api.MessagingProtocol;
 import bgu.spl181.net.api.bidi.BidiMessagingProtocol;
+import bgu.spl181.net.api.bidi.Connections_Impl;
+import bgu.spl181.net.api.bidi.MovieRentalServiceProtocol;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,18 +19,18 @@ import java.util.function.Supplier;
 public class Reactor<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
+    private final Supplier<MovieRentalServiceProtocol> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
-    
+    private Connections_Impl connections = new Connections_Impl<>();
     private Thread selectorThread;
     private final ConcurrentLinkedQueue<Runnable> selectorTasks = new ConcurrentLinkedQueue<>();
 
     public Reactor(
             int numThreads,
             int port,
-            Supplier<BidiMessagingProtocol<T>> protocolFactory,
+            Supplier<MovieRentalServiceProtocol> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> readerFactory) {
 
         this.pool = new ActorThreadPool(numThreads);
@@ -97,11 +99,13 @@ public class Reactor<T> implements Server<T> {
     private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
         SocketChannel clientChan = serverChan.accept();
         clientChan.configureBlocking(false);
-        final NonBlockingConnectionHandler handler = new NonBlockingConnectionHandler(
+        MovieRentalServiceProtocol protocol = protocolFactory.get();
+        final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<T>(
                 readerFactory.get(),
-                protocolFactory.get(),
+                protocol,
                 clientChan,
                 this);
+        protocol.start(connections.connect(handler),connections);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 

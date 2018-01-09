@@ -4,6 +4,8 @@ import bgu.spl181.net.api.MessageEncoderDecoder;
 import bgu.spl181.net.api.MessagingProtocol;
 import bgu.spl181.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl181.net.api.bidi.ConnectionHandler;
+import bgu.spl181.net.api.bidi.MovieRentalServiceProtocol;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -16,7 +18,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     private static final int BUFFER_ALLOCATION_SIZE = 1 << 13; //8k
     private static final ConcurrentLinkedQueue<ByteBuffer> BUFFER_POOL = new ConcurrentLinkedQueue<>();
 
-    private final BidiMessagingProtocol<T> protocol;
+    private final MovieRentalServiceProtocol protocol;
     private final MessageEncoderDecoder<T> encdec;
     private final Queue<ByteBuffer> writeQueue = new ConcurrentLinkedQueue<>();
     private final SocketChannel chan;
@@ -24,7 +26,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
 
     public NonBlockingConnectionHandler(
             MessageEncoderDecoder<T> reader,
-            BidiMessagingProtocol<T> protocol,
+            MovieRentalServiceProtocol protocol,
             SocketChannel chan,
             Reactor reactor) {
         this.chan = chan;
@@ -50,7 +52,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
                     while (buf.hasRemaining()) {
                         T nextMessage = encdec.decodeNextByte(buf.get());
                         if (nextMessage != null) {
-                        	protocol.process(nextMessage);
+                        	protocol.process((String)nextMessage);
                         }
                     }
                 } finally {

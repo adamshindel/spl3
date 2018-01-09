@@ -115,8 +115,7 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 					if (currentMovie != null) {
 						connections.send(connectionId,
 								"Ack info " + currentMovie.getName() + " " + currentMovie.getTotalAmount() + " "
-										+ currentMovie.getPrice() + " " + currentMovie.getBannedCountries().toString()); // syntax
-																															// error
+										+ currentMovie.getPrice() + " " + currentMovie.getBannedCountries().toString()); // syntax																						// error
 						break;
 					} else {
 						connections.send(connectionId, "ERROR requset info failed"); // isn't logged in
