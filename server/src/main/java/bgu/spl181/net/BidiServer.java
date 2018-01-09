@@ -10,7 +10,7 @@ public class BidiServer {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		SharedData service = new SharedData();
+		SharedData service = SharedData.getData();
 		String s = "1=2";
 		String[] a = s.split("=");
 		for(String s1 : a) {

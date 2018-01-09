@@ -36,13 +36,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                 	protocol.process(nextMessage);
-                	//SHOUD CALL SEND OF CONNECTIONS
-                	
-                	/*T response = protocol.process(nextMessage);
-                    if (response != null) {
-                        out.write(encdec.encode(response));
-                        out.flush();
-                    }*/
                 }
             }
 
@@ -60,7 +53,14 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
 	@Override
 	public void send(T msg) {
-		// TODO Auto-generated method stub
-		
+        if (msg != null) {
+            try {
+				out.write(encdec.encode(msg));
+				out.flush();
+            } catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
 	}
 }
