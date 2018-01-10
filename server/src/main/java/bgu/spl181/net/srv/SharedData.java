@@ -47,6 +47,7 @@ public class SharedData extends SimpleSharedData {
 	// Users :
 
 	private void loadUsers() {
+		lock.readLock().lock();
 		this.users = new ConcurrentLinkedQueue<>();
 		JsonParser parser = new JsonParser();
 		try {
@@ -71,6 +72,7 @@ public class SharedData extends SimpleSharedData {
 				this.users.add(new User(userName, type, password, country, movies, balance));
 			}
 			fileReader.close();
+			lock.readLock().unlock();
 		} catch (Exception e) {
 
 		}

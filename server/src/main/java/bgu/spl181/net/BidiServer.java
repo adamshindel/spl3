@@ -32,7 +32,7 @@ public class BidiServer {
 		moviesToAdd.put("2", "movie3");
 		john.movies = moviesToAdd;
 		service.changeMoviesUser(john, moviesToAdd);*/
-		Server.reactor(8,7777, ()->new MovieRentalServiceProtocol(),()->new LineMessageEncoderDecoder()).serve();
+		Server.reactor(1,7777, ()->new MovieRentalServiceProtocol(),()->new LineMessageEncoderDecoder()).serve();
 		
 	}
 }

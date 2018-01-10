@@ -8,7 +8,7 @@ import bgu.spl181.net.srv.SharedData;
 import bgu.spl181.net.srv.User;
 
 public class MovieRentalServiceProtocol extends User_service_text_protocol {
-	private Connections<String> connections;
+	//private Connections<String> connections;
 	private int connectionId;
 	private User currentUser = null;
 	private boolean terminate;
