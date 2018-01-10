@@ -49,8 +49,8 @@ public class SimpleSharedData {
 		return loggedUsers.get(connectionId);
 	}
 
-	public void disconnectUser(SimpleUser u) {
-		loggedUsers.remove(u);
+	public void disconnectUser(Integer connectionId) {
+		loggedUsers.remove(connectionId);
 	}
 	
 	public void addUser(SimpleUser u) {

@@ -60,7 +60,7 @@ public class User_service_text_protocol implements BidiMessagingProtocol<String>
 				connections.send(connectionId, "ERROR signout failed"); // isn't logged in
 			break;
 			}
-			data.disconnectUser(currentUser);;
+			data.disconnectUser(connectionId);
 			currentUser = null;
 			connections.send(connectionId, "ACK signout succeeded");
 			connections.disconnect(connectionId);

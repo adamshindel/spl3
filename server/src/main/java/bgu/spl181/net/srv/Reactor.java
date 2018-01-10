@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public class Reactor<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MovieRentalServiceProtocol> protocolFactory;
+    private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
@@ -30,7 +30,7 @@ public class Reactor<T> implements Server<T> {
     public Reactor(
             int numThreads,
             int port,
-            Supplier<MovieRentalServiceProtocol> protocolFactory,
+            Supplier<BidiMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> readerFactory) {
 
         this.pool = new ActorThreadPool(numThreads);
@@ -99,13 +99,14 @@ public class Reactor<T> implements Server<T> {
     private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
         SocketChannel clientChan = serverChan.accept();
         clientChan.configureBlocking(false);
-        MovieRentalServiceProtocol protocol = protocolFactory.get();
+        BidiMessagingProtocol<T> protocol = protocolFactory.get();
         final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<T>(
                 readerFactory.get(),
                 protocol,
                 clientChan,
                 this);
-        protocol.start(connections.connect(handler),connections);
+        Integer key = connections.connect(handler);
+        protocol.start(key,connections);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 

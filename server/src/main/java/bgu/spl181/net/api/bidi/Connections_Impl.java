@@ -23,9 +23,9 @@ public class Connections_Impl<T> implements Connections<T> {
 	 * send's Confirmation message??
 	 */
 	public boolean send(int connectionId, Object msg) {
-		if(activeUsers.containsKey(connectionId)) {
-		activeUsers.get(connectionId).send((T) msg);
-		return true;
+		if (activeUsers.containsKey(connectionId)) {
+			activeUsers.get(connectionId).send((T) msg);
+			return true;
 		}
 		return false;// what should be here??
 	}
@@ -49,11 +49,13 @@ public class Connections_Impl<T> implements Connections<T> {
 		// TODO Auto-generated method stub
 		activeUsers.remove(connectionId);
 	}
-	
+
 	public synchronized Integer connect(ConnectionHandler<T> toAdd) {
 		this.activeUsers.put(idCounter.get(), toAdd);
-		idCounter.incrementAndGet();
-		return idCounter.get();
+		int result =idCounter.get();
+		 idCounter.incrementAndGet();
+		return result;
+
 	}
 
 }

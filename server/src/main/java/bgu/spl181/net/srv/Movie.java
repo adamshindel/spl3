@@ -15,7 +15,7 @@ public class Movie {
 	private String availableAmount;
 	private String totalAmount;
 	private ArrayList <String> bannedCountries;
-	public Movie (String id,String name,String price, String availableAmount,String totalAmount,ArrayList<String>bannedCountries){
+	public Movie (String id,String name,String availableAmount, String price,String totalAmount,ArrayList<String>bannedCountries){
 		this.id=id;
 		this.name=name;
 		this.availableAmount=availableAmount;

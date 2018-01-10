@@ -9,7 +9,7 @@ import bgu.spl181.net.srv.User;
 
 public class MovieRentalServiceProtocol extends User_service_text_protocol {
 	//private Connections<String> connections;
-	private int connectionId;
+	//private int connectionId;
 	private User currentUser = null;
 	private boolean terminate;
 	private SharedData data = SharedData.getData();
@@ -39,7 +39,7 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 			}
 			String country = parts[3].substring(parts[3].indexOf("=\"") + 1);// (\") allows to insert quote inside a
 																				// string
-			country = country.substring(0, country.length() - 2); // cutting last quote
+			country = country.substring(1, country.length() - 1); // cutting last quote
 			data.addUser(new User(parts[1], "normal", parts[2], country, new ConcurrentHashMap<String, String>(), "0"));
 			connections.send(connectionId, "ACK registration succeeded");
 			break;
@@ -77,7 +77,7 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 				connections.send(connectionId, "ERROR signout failed"); // isn't logged in
 				break;
 			}
-			data.disconnectUser(currentUser);
+			data.disconnectUser(connectionId);
 			connections.send(connectionId, "ACK signout succeeded");
 			currentUser = null;
 			connections.disconnect(connectionId);
@@ -111,11 +111,25 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 					connections.send(connectionId, result); // syntax error
 					break;
 				} else {
-					Movie currentMovie = data.getMovieByName(parts[2]);
+					String temp="";
+					for(int i=2;i<parts.length;i++) {
+						if(i!=parts.length-1) {
+						temp=temp+parts[i]+" ";
+						}
+						else {
+							temp=temp+parts[i];
+						}
+					}
+					temp=temp.substring(1,temp.length()-1);
+					Movie currentMovie = data.getMovieByName(temp);
 					if (currentMovie != null) {
+						String banned="";
+						if(currentMovie.getBannedCountries().size()!=0) {
+							 banned = currentMovie.getBannedCountries().toString();
+						}
 						connections.send(connectionId,
-								"Ack info " + currentMovie.getName() + " " + currentMovie.getTotalAmount() + " "
-										+ currentMovie.getPrice() + " " + currentMovie.getBannedCountries().toString()); // syntax																						// error
+								"Ack info \"" + currentMovie.getName() + "\" " + currentMovie.getAviailableAmount()+ " "
+										+ currentMovie.getPrice() + " " + banned); // syntax																						// error
 						break;
 					} else {
 						connections.send(connectionId, "ERROR requset info failed"); // isn't logged in
@@ -123,7 +137,17 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 					}
 				}
 			} else if (parts[1].compareTo("rent") == 0) {
-				Movie currentMovie = data.getMovieByName(parts[2]);
+				String temp="";
+				for(int i=2;i<parts.length;i++) {
+					if(i!=parts.length-1) {
+					temp=temp+parts[i]+" ";
+					}
+					else {
+						temp=temp+parts[i];
+					}
+				}
+				temp=temp.substring(1,temp.length()-1);
+				Movie currentMovie = data.getMovieByName(temp);
 				if (currentMovie != null
 						&& Integer.parseInt(currentUser.getBalance()) >= Integer.parseInt(currentMovie.getPrice())
 						&& Integer.parseInt(currentMovie.getAviailableAmount()) >= 1
@@ -132,14 +156,14 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 					int balance = Integer.parseInt(currentUser.getBalance())
 							- Integer.parseInt(currentMovie.getPrice());
 					currentUser.setBalance(balance + "");
-					int temp = Integer.parseInt(currentMovie.getAviailableAmount()) - 1;
-					currentMovie.setAvailableAmount(temp + "");
+					int temp1 = Integer.parseInt(currentMovie.getAviailableAmount()) - 1;
+					currentMovie.setAvailableAmount(temp1 + "");
 					data.changeMovie(currentMovie, "aviailableAmount", currentMovie.getAviailableAmount());
 					data.changeUser(currentUser, "balance", currentUser.getBalance());
 					currentUser.getMovies().put(currentMovie.getId(), currentMovie.getName());
 					data.changeMoviesUser(currentUser);
-					connections.send(connectionId, "Ack rent " + currentMovie.getName() + " success");
-					connections.broadcast("BROADCAST movie " + currentMovie.getName() + " "
+					connections.send(connectionId, "Ack rent \"" + currentMovie.getName() + "\" success");
+					connections.broadcast("BROADCAST movie \"" + currentMovie.getName() + "\" "
 							+ currentMovie.getAviailableAmount() + " " + currentMovie.getPrice());
 					break;
 				} else {
@@ -147,15 +171,25 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 					break;
 				}
 			} else if (parts[1].compareTo("return") == 0) {
-				Movie currentMovie = data.getMovieByName(parts[2]);
-				if (currentMovie != null && currentUser.getMovies().containsValue(currentMovie)) {
+				String temp="";
+				for(int i=2;i<parts.length;i++) {
+					if(i!=parts.length-1) {
+					temp=temp+parts[i]+" ";
+					}
+					else {
+						temp=temp+parts[i];
+					}
+				}
+				temp=temp.substring(1,temp.length()-1);
+				Movie currentMovie = data.getMovieByName(temp);
+				if (currentMovie != null && currentUser.getMovies().containsKey(currentMovie.getId())) {
 					currentUser.getMovies().remove(currentMovie);
 					data.changeMoviesUser(currentUser);
 					int amount = Integer.parseInt(currentMovie.getAviailableAmount()) + 1;
 					currentMovie.setAvailableAmount(amount + "");
 					data.changeMovie(currentMovie, "availableAmount", currentMovie.getAviailableAmount());
-					connections.send(connectionId, "Ack return " + currentMovie.getName() + " success"); // syntax error
-					connections.broadcast("BROADCAST movie " + currentMovie.getName() + " "
+					connections.send(connectionId, "Ack return \"" + currentMovie.getName() + "\" success"); // syntax error
+					connections.broadcast("BROADCAST movie \"" + currentMovie.getName() + "\" "
 							+ currentMovie.getAviailableAmount() + " " + currentMovie.getPrice());
 				} else {
 					connections.send(connectionId, "ERROR requset return failed"); // isn't logged in
@@ -163,46 +197,91 @@ public class MovieRentalServiceProtocol extends User_service_text_protocol {
 				}
 
 			} else if (parts[1].compareTo("addmovie") == 0) {
-				int amount = Integer.parseInt("parts[3]");
-				int price = Integer.parseInt("parts[4]");
-				if (currentUser.getType().compareTo("admin") == 0 && !data.getMovies().contains(parts[2]) && price > 0
-						&& amount > 0) {
+				//int amount = Integer.parseInt();
+				//int price = Integer.parseInt());
+				
+				int first = message.indexOf("\"");
+				int second = message.indexOf("\"", first+1);
+				int third = message.indexOf("\"", second+1);
+				String tempName=message.substring(first+1, second);
+				String lastPart = message.substring(second+1,message.length());
+				//if
+				String[] addMovieParts = lastPart.split("\"");
+				String [] parms = addMovieParts[0].split(" ");
+				String price = "";
+				String amount = "";
+				for(int i = 0; i<parms.length && (price.compareTo("")==0|| amount.compareTo("")==0);i++) {
+					if(amount.compareTo("")==0 && parms[i].compareTo("")!=0) {
+						amount = parms[i];
+					}
+					else if(price.compareTo("")==0 && parms[i].compareTo("")!=0) {
+						price = parms[i];
+					}
+				}
+				ArrayList<String> bannedCountries = new ArrayList<>();
+				for(int i=1; i< addMovieParts.length; i++) {
+					if(addMovieParts[i].replaceAll(" ", "").compareTo("")!= 0) {
+						bannedCountries.add(addMovieParts[i]);
+					}
+				}
+				/*for(int i=2; i<parts.length-3; i++) {
+					tempName += parts[i] + " ";
+				}
+				tempName = parts[parts.length-3];
+				tempName = tempName.substring(1, tempName.length()-1);*/
+				if (currentUser.getType().compareTo("admin") == 0 && !data.getMovies().contains(tempName) && Integer.parseInt(price) > 0
+						&& Integer.parseInt(amount) > 0) {
 					int temp = Integer.parseInt(data.getHighestId()) + 1;
 					data.setHighestId(temp + "");
-					ArrayList<String> bannedCountries = new ArrayList<>();
-					for (int i = 5; i < parts.length; i++) {
-						bannedCountries.add(parts[i]);
-					}
-					data.addMovie(new Movie(data.getHighestId(), parts[2], price + "", amount + "", amount + "",
+					//ArrayList<String> bannedCountries = new ArrayList<>();
+					//for (int i = 5; i < parts.length; i++) {
+					//	bannedCountries.add(parts[i]);
+				//	}
+					data.addMovie(new Movie(data.getHighestId(), tempName, amount + "", price + "", amount + "",
 							bannedCountries));
-					connections.send(connectionId, "Ack addmovie " + parts[2] + " success");
-					connections.broadcast("BROADCAST movie " + parts[2] + " " + amount + " " + price);
+					connections.send(connectionId, "Ack addmovie \"" + tempName + "\" success");
+					connections.broadcast("BROADCAST movie \"" + tempName + "\" " + amount + " " + price);
 				} else {
 					connections.send(connectionId, "ERROR requset addmovie failed"); // isn't logged in
 					break;
 				}
 			} else if (parts[1].compareTo("remmovie") == 0) {
-				Movie currentMovie = data.getMovieByName(parts[2]);
+				String temp="";
+				for(int i=2;i<parts.length;i++) {
+					if(i!=parts.length-1) {
+					temp=temp+parts[i]+" ";
+					}
+					else {
+						temp=temp+parts[i];
+					}
+				}
+				temp=temp.substring(1,temp.length()-1);
+				Movie currentMovie = data.getMovieByName(temp);
 				if (currentUser.getType().compareTo("admin") == 0 && currentMovie != null
-						&& data.getMovies().contains(parts[2])
-						&& currentMovie.getAviailableAmount() == currentMovie.getTotalAmount()) {
+						&& data.getMovies().contains(currentMovie)
+						&& currentMovie.getAviailableAmount().compareTo(currentMovie.getTotalAmount())==0) {
 					data.removeMovie(currentMovie);
-					connections.send(connectionId, "Ack remmovie " + parts[2] + " success");
-					connections.broadcast("BROADCAST movie " + parts[2] + " removed");
+					connections.send(connectionId, "Ack remmovie \"" + temp + "\" success");
+					connections.broadcast("BROADCAST movie \"" + temp + "\" removed");
 				} else {
 					connections.send(connectionId, "ERROR requset remmovie failed"); // isn't logged in
 					break;
 				}
 			} else if (parts[1].compareTo("changeprice") == 0) {
-				Movie currentMovie = data.getMovieByName(parts[2]);
-				int price = Integer.parseInt("parts[3]");
+				int first = message.indexOf("\"");
+				int second = message.indexOf("\"", first+1);
+				String tempName=message.substring(first+1, second);
+				String price = message.substring(second+1,message.length()).replace(" ", "");
+				
+				
+				Movie currentMovie = data.getMovieByName(tempName);
 				if (currentMovie != null && currentUser.getType().compareTo("admin") == 0
-						&& data.getMovies().contains(currentMovie) && price > 0) {
-					currentMovie.setPrice(price + "");
+						&& data.getMovies().contains(currentMovie) &&  Integer.parseInt(price) > 0) {
+					currentMovie.setPrice(price);
 					data.changeMovie(currentMovie, "price", currentMovie.getPrice());
-					connections.send(connectionId, "Ack changeprice " + parts[2] + " success");
+					connections.send(connectionId, "Ack changeprice \"" +tempName+ "\" success");
 					connections.broadcast(
-							"BROADCAST movie " + parts[2] + " " + currentMovie.getAviailableAmount() + " " + price);
+							"BROADCAST movie \"" + tempName+ "\" " + currentMovie.getAviailableAmount() + " " + price);
 
 				} else {
 					connections.send(connectionId, "ERROR requset changeprice failed"); // isn't logged in

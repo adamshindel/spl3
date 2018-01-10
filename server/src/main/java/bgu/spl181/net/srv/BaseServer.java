@@ -27,10 +27,10 @@ public abstract class BaseServer<T> implements Server<T> {
         this.encdecFactory = encdecFactory;
 		this.sock = null;
     }
-
+ 
     @Override
     public void serve() {
-
+    	
         try (ServerSocket serverSock = new ServerSocket(port)) {
 			System.out.println("Server started");
 

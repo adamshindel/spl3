@@ -19,22 +19,26 @@ import com.google.gson.JsonParser;
 public class SharedData extends SimpleSharedData {
 
 	private static SharedData instance;
-	private ReadWriteLock lock = new ReentrantReadWriteLock();
 
 	// Users fields:
 	private static final String locationUsers = "C:\\projects\\spl\\assignment 3\\project\\server\\Database\\Users.json";
-	private ConcurrentLinkedQueue<User> users;
-	private Map<Integer, User> loggedUsers;
+	private ConcurrentLinkedQueue<User> users=new ConcurrentLinkedQueue<>();
+	private Map<Integer, User> loggedUsers=new ConcurrentHashMap<>();
+	private ReadWriteLock usersLock = new ReentrantReadWriteLock();
 
 	// Movies fields:
 	private static final String locationMovies = "C:\\projects\\spl\\assignment 3\\project\\server\\Database\\Movies.json";
 	private ConcurrentLinkedQueue<Movie> movies;
 	private String highyestId = "0";
+	private ReadWriteLock moviesLock = new ReentrantReadWriteLock();
 
 	private SharedData() {
-
+		usersLock.readLock().lock();
 		loadUsers();
+		usersLock.readLock().unlock();
+		moviesLock.readLock().lock();
 		loadMovies();
+		moviesLock.readLock().unlock();
 	}
 
 	public static synchronized SharedData getData() {
@@ -47,7 +51,6 @@ public class SharedData extends SimpleSharedData {
 	// Users :
 
 	private void loadUsers() {
-		lock.readLock().lock();
 		this.users = new ConcurrentLinkedQueue<>();
 		JsonParser parser = new JsonParser();
 		try {
@@ -72,7 +75,6 @@ public class SharedData extends SimpleSharedData {
 				this.users.add(new User(userName, type, password, country, movies, balance));
 			}
 			fileReader.close();
-			lock.readLock().unlock();
 		} catch (Exception e) {
 
 		}
@@ -106,12 +108,11 @@ public class SharedData extends SimpleSharedData {
 	public void addUser(User toAdd) {
 		super.addUser(toAdd);
 		try {
+			usersLock.writeLock().lock();
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
-			lock.readLock().lock();
 			FileReader fileReader = new FileReader(locationUsers);
 			Object obj = parser.parse(fileReader);
-			lock.readLock().unlock();
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray jusers = jsonObj.get("users").getAsJsonArray();
 			JsonElement newE = new JsonObject();
@@ -130,34 +131,32 @@ public class SharedData extends SimpleSharedData {
 			newE.getAsJsonObject().add("movies", j);
 			newE.getAsJsonObject().addProperty("balance", toAdd.getBalance());
 			jusers.add(newE);
-			lock.writeLock().lock();
 			FileWriter fileWriter = new FileWriter(locationUsers, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.flush();
 			fileWriter.close();
-			lock.writeLock().unlock();
 			users.add(toAdd);
+			usersLock.writeLock().unlock();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void disconnectUser(User u) {
-		super.disconnectUser(u);
-		loggedUsers.remove(u);
+	public void disconnectUser(Integer connectionId) {
+		super.disconnectUser(connectionId);
+		
+		loggedUsers.remove(connectionId);
 	}
 
 	public void changeUser(User changedUser, String property, String value) {
 
 		try {
-
+			usersLock.writeLock().lock();
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
-			lock.readLock().lock();
 			FileReader fileReader = new FileReader(locationUsers);
 			Object obj = parser.parse(fileReader);
-			lock.readLock().unlock();
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray jusers = jsonObj.get("users").getAsJsonArray();
 			for (JsonElement element : jusers) {
@@ -166,11 +165,10 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
-			lock.writeLock().lock();
+
 			FileWriter fileWriter = new FileWriter(locationUsers, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.close();
-			lock.writeLock().unlock();
 			for (User u : users) {
 				if (u.getUserName().compareTo(changedUser.getUserName()) == 0) {
 					users.remove(u);
@@ -178,6 +176,7 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
+			usersLock.writeLock().unlock();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -186,13 +185,11 @@ public class SharedData extends SimpleSharedData {
 	public void changeMoviesUser(User changedUser) {
 
 		try {
-
+			usersLock.writeLock().lock();
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
-			lock.readLock().lock();
 			FileReader fileReader = new FileReader(locationUsers);
 			Object obj = parser.parse(fileReader);
-			lock.readLock().unlock();
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray j = new JsonArray();
 			for (Map.Entry<String, String> entry : changedUser.getMovies().entrySet()) {
@@ -209,11 +206,9 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
-			lock.writeLock().lock();
 			FileWriter fileWriter = new FileWriter(locationUsers, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.close();
-			lock.writeLock().unlock();
 			for (User u : users) {
 				if (u.getUserName().compareTo(changedUser.getUserName()) == 0) {
 					users.remove(u);
@@ -221,6 +216,7 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
+			usersLock.writeLock().unlock();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -270,6 +266,7 @@ public class SharedData extends SimpleSharedData {
 	}
 
 	public void addMovie(Movie toAdd) {
+		moviesLock.writeLock().lock();
 		movies.add(toAdd);
 		if (Integer.parseInt(toAdd.getId()) > Integer.parseInt(highyestId)) {
 			highyestId = toAdd.getId();
@@ -277,10 +274,8 @@ public class SharedData extends SimpleSharedData {
 		try {
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
-			lock.readLock().lock();
 			FileReader fileReader = new FileReader(locationMovies);
 			Object obj = parser.parse(fileReader);
-			lock.readLock().unlock();
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray jmovies = jsonObj.get("movies").getAsJsonArray();
 			JsonElement newE = new JsonObject();
@@ -296,13 +291,12 @@ public class SharedData extends SimpleSharedData {
 			newE.getAsJsonObject().addProperty("availableAmount", toAdd.getAviailableAmount());
 			newE.getAsJsonObject().addProperty("totalAmount", toAdd.getTotalAmount());
 			jmovies.add(newE);
-			lock.writeLock().lock();
 			FileWriter fileWriter = new FileWriter(locationMovies, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.flush();
 			fileWriter.close();
-			lock.writeLock().unlock();
 			movies.add(toAdd);
+			moviesLock.writeLock().unlock();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -312,13 +306,11 @@ public class SharedData extends SimpleSharedData {
 	public void changeMovie(Movie changedMovie, String property, String value) {
 
 		try {
-
+			moviesLock.writeLock().lock();
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
-			lock.readLock().lock();
 			FileReader fileReader = new FileReader(locationMovies);
 			Object obj = parser.parse(fileReader);
-			lock.readLock().unlock();
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray jusers = jsonObj.get("movies").getAsJsonArray();
 			for (JsonElement element : jusers) {
@@ -327,11 +319,9 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
-			lock.writeLock().lock();
 			FileWriter fileWriter = new FileWriter(locationMovies, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.close();
-			lock.writeLock().unlock();
 			for (Movie m : movies) {
 				if (m.getName().compareTo(changedMovie.getName()) == 0) {
 					movies.remove(m);
@@ -339,25 +329,30 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
+			moviesLock.writeLock().unlock();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void removeMovie(Movie toRemove) {
+
+		moviesLock.writeLock().lock();
 		movies.remove(toRemove);
 		if (toRemove.getId() == highyestId) {
-			highyestId = (Integer.parseInt(highyestId) + 1) + "";
+			String most = "0";
+			for (Movie movie : movies) {
+				if (Integer.parseInt(movie.getId()) > Integer.parseInt(most)) {
+					highyestId = movie.getId();
+				}
+			}
 		}
-
 		try {
-
 			Gson gson = new Gson();
 			JsonParser parser = new JsonParser();
-			lock.readLock().lock();
 			FileReader fileReader = new FileReader(locationMovies);
 			Object obj = parser.parse(fileReader);
-			lock.readLock().unlock();
+
 			JsonObject jsonObj = (JsonObject) obj;
 			JsonArray jusers = jsonObj.get("movies").getAsJsonArray();
 			for (JsonElement element : jusers) {
@@ -366,15 +361,12 @@ public class SharedData extends SimpleSharedData {
 					break;
 				}
 			}
-			lock.writeLock().lock();
 			FileWriter fileWriter = new FileWriter(locationMovies, false);
 			fileWriter.write(gson.toJson(obj));
 			fileWriter.close();
-			lock.writeLock().unlock();
+			moviesLock.writeLock().unlock();
 		} catch (Exception e) {
-
 		}
-
 	}
 
 	public ConcurrentLinkedQueue<Movie> getMovies() {
