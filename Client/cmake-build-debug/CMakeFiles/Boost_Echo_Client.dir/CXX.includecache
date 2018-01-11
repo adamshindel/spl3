@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/users/studs/bsc/2016/adamsh/Downloads/spl3/Boost_Echo_Client/include/connectionHandler.h
+string
+-
+iostream
+-
+boost/asio.hpp
+-
+
+/users/studs/bsc/2016/adamsh/Downloads/spl3/Boost_Echo_Client/src/connectionHandler.cpp
+../include/connectionHandler.h
+/users/studs/bsc/2016/adamsh/Downloads/spl3/Boost_Echo_Client/include/connectionHandler.h
+string
+-
+
+/users/studs/bsc/2016/adamsh/Downloads/spl3/Boost_Echo_Client/src/echoClient.cpp
+stdlib.h
+-
+string
+-
+../include/connectionHandler.h
+/users/studs/bsc/2016/adamsh/Downloads/spl3/Boost_Echo_Client/include/connectionHandler.h
+boost/thread.hpp
+-
+iostream
+-
+atomic
+-
+

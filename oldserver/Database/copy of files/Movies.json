@@ -29,15 +29,15 @@
     },
     {
       "id": "4",
-      "name": "South Park: Bigger, Longer \u0026 Uncut",
-      "price": "9",
+      "name": "Justice League",
+      "price": "17",
       "bannedCountries": [
-        "Israel",
-        "Iran",
-        "Italy"
+        "jordan",
+        "iran",
+        "lebanon"
       ],
-      "availableAmount": "30",
-      "totalAmount": "30"
+      "availableAmount": "4",
+      "totalAmount": "4"
     }
   ]
 }
